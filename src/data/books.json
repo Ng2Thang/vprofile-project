@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "The Hitchhiker's Guide to the Galaxy",
+    "author": "Douglas Adams",
+    "year": 1979
+  },
+  {
+    "id": 2,
+    "title": "Dune",
+    "author": "Frank Herbert",
+    "year": 1965
+  },
+  {
+    "id": 3,
+    "title": "Foundation",
+    "author": "Isaac Asimov",
+    "year": 1951
+  },
+  {
+    "id": 4,
+    "title": "1984",
+    "author": "George Orwell",
+    "year": 1949
+  }
+]

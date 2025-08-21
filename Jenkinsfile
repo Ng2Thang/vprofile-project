@@ -1,122 +1,107 @@
 pipeline {
-    
 	agent any
-/*	
-	tools {
-        maven "maven3"
-	
-    }
-*/	
+
     environment {
-        NEXUS_VERSION = "nexus3"
-        NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "172.31.40.209:8081"
-        NEXUS_REPOSITORY = "vprofile-release"
-	NEXUS_REPO_ID    = "vprofile-release"
-        NEXUS_CREDENTIAL_ID = "nexuslogin"
-        ARTVERSION = "${env.BUILD_ID}"
+        // It's a good practice to use a virtual environment for Python projects
+        VENV_DIR = ".venv"
+
+        // Nexus Configuration for a PyPI repository
+        // NOTE: You might need to adjust NEXUS_REPOSITORY_NAME if your PyPI repository in Nexus has a different name.
+        NEXUS_REPOSITORY_NAME = "vprofile-pypi-release"
+        NEXUS_URL             = "172.31.40.209:8081"
+        NEXUS_PYPI_REPO_URL   = "http://${NEXUS_URL}/repository/${NEXUS_REPOSITORY_NAME}/"
+        NEXUS_CREDENTIAL_ID   = "nexuslogin"
     }
 	
-    stages{
+    stages {
         
-        stage('BUILD'){
+        stage('Setup and Install Dependencies') {
             steps {
-                sh 'mvn clean install -DskipTests'
-            }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.war'
-                }
-            }
-        }
-
-	stage('UNIT TEST'){
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-	stage('INTEGRATION TEST'){
-            steps {
-                sh 'mvn verify -DskipUnitTests'
-            }
-        }
-		
-        stage ('CODE ANALYSIS WITH CHECKSTYLE'){
-            steps {
-                sh 'mvn checkstyle:checkstyle'
-            }
-            post {
-                success {
-                    echo 'Generated Analysis Result'
-                }
-            }
-        }
-
-        stage('CODE ANALYSIS with SONARQUBE') {
-          
-		  environment {
-             scannerHome = tool 'sonarscanner4'
-          }
-
-          steps {
-            withSonarQubeEnv('sonar-pro') {
-               sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
-                   -Dsonar.projectName=vprofile-repo \
-                   -Dsonar.projectVersion=1.0 \
-                   -Dsonar.sources=src/ \
-                   -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                   -Dsonar.junit.reportsPath=target/surefire-reports/ \
-                   -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                   -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-            }
-
-            timeout(time: 10, unit: 'MINUTES') {
-               waitForQualityGate abortPipeline: true
-            }
-          }
-        }
-
-        stage("Publish to Nexus Repository Manager") {
-            steps {
+                echo "--- Setting up and installing dependencies ---"
                 script {
-                    pom = readMavenPom file: "pom.xml";
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    artifactPath = filesByGlob[0].path;
-                    artifactExists = fileExists artifactPath;
-                    if(artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
-                        nexusArtifactUploader(
-                            nexusVersion: NEXUS_VERSION,
-                            protocol: NEXUS_PROTOCOL,
-                            nexusUrl: NEXUS_URL,
-                            groupId: pom.groupId,
-                            version: ARTVERSION,
-                            repository: NEXUS_REPOSITORY,
-                            credentialsId: NEXUS_CREDENTIAL_ID,
-                            artifacts: [
-                                [artifactId: pom.artifactId,
-                                classifier: '',
-                                file: artifactPath,
-                                type: pom.packaging],
-                                [artifactId: pom.artifactId,
-                                classifier: '',
-                                file: "pom.xml",
-                                type: "pom"]
-                            ]
-                        );
-                    } 
-		    else {
-                        error "*** File: ${artifactPath}, could not be found";
+                    // Use python3, assuming it's available on the agent.
+                    // You might need to configure a Python tool in Jenkins Global Tool Configuration.
+                    def python_executable = "python3"
+
+                    // Clean up previous virtual environment if it exists
+                    if (fileExists(VENV_DIR)) {
+                        sh "rm -rf ${VENV_DIR}"
                     }
+                    // Create a new virtual environment
+                    sh "${python_executable} -m venv ${VENV_DIR}"
+
+                    // The activate script path is different on Windows vs. Unix-like systems.
+                    // This example assumes a Unix-like agent.
+                    sh """
+                    . ${VENV_DIR}/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    # Install tools needed for testing, building, and publishing
+                    pip install pytest pytest-cov flake8 build twine
+                    """
                 }
             }
         }
 
+        stage('Linting') {
+            steps {
+                echo "--- Running linter ---"
+                // Run a linter like flake8 to check code quality
+                sh ". ${VENV_DIR}/bin/activate && flake8 ."
+            }
+        }
 
+        stage('Unit Test') {
+            steps {
+                echo "--- Running unit tests ---"
+                // Run tests with pytest and generate a coverage report
+                sh ". ${VENV_DIR}/bin/activate && pytest --cov=. --cov-report=xml"
+            }
+            post {
+                success {
+                    echo 'Unit tests passed.'
+                    // You can archive coverage reports here if needed.
+                    // For example, if you have the Cobertura plugin installed:
+                    // cobertura coberturaReportFile: 'coverage.xml'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo "--- Building the project ---"
+                // Clean previous build artifacts
+                sh "rm -rf dist/ build/ *.egg-info"
+                // Build the wheel and source distribution using the 'build' package
+                sh ". ${VENV_DIR}/bin/activate && python -m build"
+            }
+            post {
+                success {
+                    echo 'Archiving build artifacts...'
+                    archiveArtifacts artifacts: 'dist/*'
+                }
+            }
+        }
+
+        // stage('Publish to Nexus') {
+        //     steps {
+        //         echo "--- Publishing to Nexus ---"
+        //         // Use Jenkins credentials for Nexus username and password
+        //         withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIAL_ID, usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
+        //             sh """
+        //             . ${VENV_DIR}/bin/activate
+        //             twine upload --repository-url ${NEXUS_PYPI_REPO_URL} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD} dist/*
+        //             """
+        //         }
+        //     }
+        // }
     }
 
-
+    post {
+        always {
+            echo 'Pipeline finished. Cleaning up workspace.'
+            // Clean up the virtual environment
+            sh "rm -rf ${VENV_DIR}"
+        }
+    }
 }
