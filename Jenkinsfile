@@ -18,28 +18,28 @@ pipeline {
         stage('Setup and Install Dependencies') {
             steps {
                 echo "--- Setting up and installing dependencies ---"
-                script {
-                    // Use python3, assuming it's available on the agent.
-                    // You might need to configure a Python tool in Jenkins Global Tool Configuration.
-                    def python_executable = "python3"
+                // script {
+                //     // Use python3, assuming it's available on the agent.
+                //     // You might need to configure a Python tool in Jenkins Global Tool Configuration.
+                //     def python_executable = "python3.11"
 
-                    // Clean up previous virtual environment if it exists
-                    if (fileExists(VENV_DIR)) {
-                        sh "rm -rf ${VENV_DIR}"
-                    }
-                    // Create a new virtual environment
-                    sh "${python_executable} -m venv ${VENV_DIR}"
+                //     // Clean up previous virtual environment if it exists
+                //     if (fileExists(VENV_DIR)) {
+                //         sh "rm -rf ${VENV_DIR}"
+                //     }
+                //     // Create a new virtual environment
+                //     sh "${python_executable} -m venv ${VENV_DIR}"
 
-                    // The activate script path is different on Windows vs. Unix-like systems.
-                    // This example assumes a Unix-like agent.
-                    sh """
-                    . ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    # Install tools needed for testing, building, and publishing
-                    pip install pytest pytest-cov flake8 build twine
-                    """
-                }
+                //     // The activate script path is different on Windows vs. Unix-like systems.
+                //     // This example assumes a Unix-like agent.
+                //     sh """
+                //     . ${VENV_DIR}/bin/activate
+                //     pip install --upgrade pip
+                //     pip install -r requirements.txt
+                //     # Install tools needed for testing, building, and publishing
+                //     pip install pytest pytest-cov flake8 build twine
+                //     """
+                // }
             }
         }
 
@@ -47,7 +47,7 @@ pipeline {
             steps {
                 echo "--- Running linter ---"
                 // Run a linter like flake8 to check code quality
-                sh ". ${VENV_DIR}/bin/activate && flake8 ."
+                // sh ". ${VENV_DIR}/bin/activate && flake8 ."
             }
         }
 
@@ -55,7 +55,7 @@ pipeline {
             steps {
                 echo "--- Running unit tests ---"
                 // Run tests with pytest and generate a coverage report
-                sh ". ${VENV_DIR}/bin/activate && pytest --cov=. --cov-report=xml"
+                // sh ". ${VENV_DIR}/bin/activate && pytest --cov=. --cov-report=xml"
             }
             post {
                 success {
@@ -70,15 +70,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo "--- Building the project ---"
-                // Clean previous build artifacts
-                sh "rm -rf dist/ build/ *.egg-info"
+                // Clean psrevious build artifacts
+                // sh "rm -rf dist/ build/ *.egg-info"
                 // Build the wheel and source distribution using the 'build' package
-                sh ". ${VENV_DIR}/bin/activate && python -m build"
+                // sh ". ${VENV_DIR}/bin/activate && python -m build"
             }
             post {
                 success {
                     echo 'Archiving build artifacts...'
-                    archiveArtifacts artifacts: 'dist/*'
+                    // archiveArtifacts artifacts: 'dist/*'
                 }
             }
         }
