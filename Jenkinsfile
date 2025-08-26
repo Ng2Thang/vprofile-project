@@ -49,23 +49,24 @@ pipeline {
         stage('Linting') {
             steps {
                 echo "--- Running linter ---"
-                // Run a linter like flake8 to check code quality
-                // sh ". ${VENV_DIR}/bin/activate && flake8 ."
+                // Run a linter like flake8 to check code quality within the 'src' directory
+                sh ". ${VENV_DIR}/bin/activate && flake8 src"
             }
         }
 
         stage('Unit Test') {
             steps {
                 echo "--- Running unit tests ---"
-                // Run tests with pytest and generate a coverage report
-                // sh ". ${VENV_DIR}/bin/activate && pytest --cov=. --cov-report=xml"
+                // Run tests with pytest, targeting the 'src' directory for coverage,
+                // and generate a coverage report in XML format.
+                sh ". ${VENV_DIR}/bin/activate && pytest --cov=src --cov-report=xml"
             }
             post {
                 success {
                     echo 'Unit tests passed.'
                     // You can archive coverage reports here if needed.
                     // For example, if you have the Cobertura plugin installed:
-                    // cobertura coberturaReportFile: 'coverage.xml'
+                    cobertura coberturaReportFile: 'coverage.xml'
                 }
             }
         }
@@ -73,15 +74,20 @@ pipeline {
         stage('Build') {
             steps {
                 echo "--- Building the project ---"
-                // Clean psrevious build artifacts
-                // sh "rm -rf dist/ build/ *.egg-info"
-                // Build the wheel and source distribution using the 'build' package
-                // sh ". ${VENV_DIR}/bin/activate && python -m build"
+                // The build process should run inside the 'src' directory where setup.py/pyproject.toml is located.
+                dir('src') {
+                    // Clean previous build artifacts
+                    sh "rm -rf dist/ build/ *.egg-info"
+                    // Build the wheel and source distribution using the 'build' package
+                    // Note the path to the activate script is relative to the 'src' directory.
+                    sh ". ../${VENV_DIR}/bin/activate && python -m build"
+                }
             }
             post {
                 success {
                     echo 'Archiving build artifacts...'
-                    // archiveArtifacts artifacts: 'dist/*'
+                    // Artifacts are in the 'src/dist' directory after the build.
+                    archiveArtifacts artifacts: 'src/dist/*'
                 }
             }
         }
