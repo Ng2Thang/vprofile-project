@@ -17,7 +17,11 @@ pipeline {
         
         stage('Setup and Install Dependencies') {
             steps {
-                echo "--- Setting up and installing dependencies ---"
+                echo "--- Cloning source and installing dependencies ---"
+                // This step checks out the repository configured for this Jenkins job.
+                // The 'src' directory should be at the root of your repository.
+                checkout scm
+
                 script {
                     // Use python3, assuming it's available on the agent.
                     // You might need to configure a Python tool in Jenkins Global Tool Configuration.
@@ -35,7 +39,7 @@ pipeline {
                     sh """
                     . ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
-                    pip install -r requirements.txt
+                    pip install -r src/requirements.txt
                     pip install pytest pytest-cov flake8 build twine
                     """
                 }
