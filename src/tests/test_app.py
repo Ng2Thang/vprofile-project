@@ -3,9 +3,10 @@ import json
 import sys
 import os
 
-# Add the parent directory ('src') to the Python path to resolve the module not found error.
-# This allows the test to import the 'app' module from the 'src' directory.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add the 'src' directory to sys.path to allow importing 'app'.
+# This is necessary because the test is run from the project root.
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, SRC_PATH)
 
 from app import app  # noqa: E402
 

@@ -18,6 +18,7 @@ def home():
     return render_template('index.html', message="Hello from Flask!")
 
 
+
 @app.route('/books')
 def show_books():
     """Renders a page displaying a list of books."""
@@ -25,11 +26,13 @@ def show_books():
     return render_template('books.html', books=books)
 
 
+
 @app.route('/api/books', methods=['GET'])
 def get_books():
     """API endpoint to get all books."""
     books = load_books_from_json()
     return jsonify(books)
+
 
 
 if __name__ == '__main__':
