@@ -18,27 +18,27 @@ pipeline {
         stage('Setup and Install Dependencies') {
             steps {
                 echo "--- Setting up and installing dependencies ---"
-                script {
-                    // Use python3, assuming it's available on the agent.
-                    // You might need to configure a Python tool in Jenkins Global Tool Configuration.
-                    def python_executable = "python3.11"
+                // script {
+                //     // Use python3, assuming it's available on the agent.
+                //     // You might need to configure a Python tool in Jenkins Global Tool Configuration.
+                //     def python_executable = "python3.11"
 
-                    // Clean up previous virtual environment if it exists
-                    if (fileExists(VENV_DIR)) {
-                        sh "rm -rf ${VENV_DIR}"
-                    }
-                    // Create a new virtual environment
-                    sh "${python_executable} -m venv ${VENV_DIR}"
+                //     // Clean up previous virtual environment if it exists
+                //     if (fileExists(VENV_DIR)) {
+                //         sh "rm -rf ${VENV_DIR}"
+                //     }
+                //     // Create a new virtual environment
+                //     sh "${python_executable} -m venv ${VENV_DIR}"
 
-                    // The activate script path is different on Windows vs. Unix-like systems.
-                    // This example assumes a Unix-like agent.
-                    sh """
-                    . ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest pytest-cov flake8 build twine
-                    """
-                }
+                //     // The activate script path is different on Windows vs. Unix-like systems.
+                //     // This example assumes a Unix-like agent.
+                //     sh """
+                //     . ${VENV_DIR}/bin/activate
+                //     pip install --upgrade pip
+                //     pip install -r requirements.txt
+                //     pip install pytest pytest-cov flake8 build twine
+                //     """
+                // }
             }
         }
 
