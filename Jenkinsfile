@@ -82,7 +82,10 @@ pipeline {
                     // You can archive coverage reports here if needed.
                     // For example, if you have the Cobertura plugin installed:
                     // The coverage report is now generated inside the 'src' directory.
-                    cobertura coberturaReportFile: 'src/coverage.xml'
+                    // cobertura coberturaReportFile: 'src/coverage.xml'
+                    // Archive the coverage report so it can be downloaded from the Jenkins UI.
+                    echo 'Archiving test reports...'
+                    archiveArtifacts artifacts: 'src/coverage.xml'
                 }
             }
         }
