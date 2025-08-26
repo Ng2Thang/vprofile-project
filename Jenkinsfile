@@ -68,17 +68,21 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                echo "--- Running unit tests ---"
-                // Run tests with pytest, targeting the 'src' directory for coverage,
-                // and generate a coverage report in XML format.
-                sh ". ${VENV_DIR}/bin/activate && pytest --cov=src --cov-report=xml"
+                dir('src') {
+                    echo "--- Running unit tests ---"
+                    // Run tests with pytest, targeting the current directory for coverage,
+                    // and generate a coverage report in XML format.
+                    // Note the path to the activate script is relative to the 'src' directory.
+                    sh ". ../${VENV_DIR}/bin/activate && pytest --cov=. --cov-report=xml"
+                }
             }
             post {
                 success {
                     echo 'Unit tests passed.'
                     // You can archive coverage reports here if needed.
                     // For example, if you have the Cobertura plugin installed:
-                    cobertura coberturaReportFile: 'coverage.xml'
+                    // The coverage report is now generated inside the 'src' directory.
+                    cobertura coberturaReportFile: 'src/coverage.xml'
                 }
             }
         }
