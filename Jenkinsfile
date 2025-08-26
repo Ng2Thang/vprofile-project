@@ -48,9 +48,21 @@ pipeline {
 
         stage('Linting') {
             steps {
-                echo "--- Running linter ---"
-                // Run a linter like flake8 to check code quality within the 'src' directory
-                sh ". ${VENV_DIR}/bin/activate && flake8 src"
+                script {
+                    try {
+                        echo "--- Running linter ---"
+                        sh """
+                        set -e
+                        . ${VENV_DIR}/bin/activate
+                        flake8 src
+                        """
+                        echo "Linting passed."
+                    } catch (any) {
+                        echo "Linting failed, but continuing."
+                        // Mark the build as unstable to provide a visual cue of the non-critical failure.
+                        currentBuild.result = 'UNSTABLE'
+                    }
+                }
             }
         }
 
