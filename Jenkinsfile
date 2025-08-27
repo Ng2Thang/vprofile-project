@@ -93,7 +93,7 @@ pipeline {
         stage('SonarQube Analysis') {
             environment {
                 // ID of the 'Secret text' credential in Jenkins for your SonarQube token
-                SONAR_TOKEN_CRED_ID = 'sqp_b125a16574841c684f33a0c803cc59ab1d66be1a' 
+                SONAR_TOKEN_CRED_ID = 'SONAR_TOKEN_CRED_ID' 
                 // URL of your SonarQube server
                 SONAR_HOST_URL = 'http://localhost:9000' // Example, change to your SonarQube URL
             }
