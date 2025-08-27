@@ -42,7 +42,7 @@ pipeline {
                     sh """
                     . ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
-                    pip install -r src/requirements.txt
+                    pip install -r requirements.txt
                     pip install pytest pytest-cov flake8 build twine
                     """
                 }
