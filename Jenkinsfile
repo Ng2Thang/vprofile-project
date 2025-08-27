@@ -108,7 +108,7 @@ pipeline {
                         ${scannerHome}/bin/sonar-scanner \\
                           -Dsonar.projectKey=python-project \\
                           -Dsonar.sources=. \\
-                          -Dsonar.host.url=http://localhost:9000 \\
+                          -Dsonar.host.url=https://7cff75154d12.ngrok-free.app \\
                           -Dsonar.login=sqp_b125a16574841c684f33a0c803cc59ab1d66be1a
                         """
                     }
