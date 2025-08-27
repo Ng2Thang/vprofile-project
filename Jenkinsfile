@@ -100,14 +100,17 @@ pipeline {
                     // configured in Jenkins -> Configure System -> SonarQube servers.
                     // The name must match the name of the server configuration.
                     withSonarQubeEnv('sonar-server') {
+                        // sh """
+                        // ${scannerHome}/sonar-scanner \\
+                        //   -Dsonar.projectKey=python-project \\
+                        //   -Dsonar.projectName=python-project \\
+                        //   -Dsonar.projectVersion=${currentBuild.number} \\
+                        //   -Dsonar.sources=src \\
+                        //   -Dsonar.python.coverage.reportPath=src/coverage.xml \\
+                        //   -Dsonar.scm.disabled=true
+                        // """
                         sh """
-                        ${scannerHome}/sonar-scanner \\
-                          -Dsonar.projectKey=python-project \\
-                          -Dsonar.projectName=python-project \\
-                          -Dsonar.projectVersion=${currentBuild.number} \\
-                          -Dsonar.sources=src \\
-                          -Dsonar.python.coverage.reportPath=src/coverage.xml \\
-                          -Dsonar.scm.disabled=true
+                            ls -la
                         """
                     }
                 }
