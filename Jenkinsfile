@@ -96,24 +96,18 @@ pipeline {
                 // configured in Jenkins -> Global Tool Configuration.
                 tool 'sonar-scanner'
             }
-            environment {
-                // ID of the 'Secret text' credential in Jenkins for your SonarQube token
-                SONAR_TOKEN_CRED_ID = 'SONAR_TOKEN_CRED_ID'
-                // URL of your SonarQube server
-                SONAR_HOST_URL = 'http://localhost:9000' // Change to your SonarQube URL
-            }
             steps {
                 script {
-                    // The 'tool' directive above adds the SonarQube Scanner's bin directory to the PATH
-                    withCredentials([string(credentialsId: SONAR_TOKEN_CRED_ID, variable: 'SONAR_TOKEN')]) {
+                    // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
+                    // configured in Jenkins -> Configure System -> SonarQube servers.
+                    // The name must match the name of the server configuration.
+                    withSonarQubeEnv('sonar-server') {
                         sh """
                         sonar-scanner \\
                           -Dsonar.projectKey=python-project \\
                           -Dsonar.projectName=python-project \\
                           -Dsonar.projectVersion=${currentBuild.number} \\
                           -Dsonar.sources=src \\
-                          -Dsonar.host.url=${SONAR_HOST_URL} \\
-                          -Dsonar.login=\${SONAR_TOKEN} \\
                           -Dsonar.python.coverage.reportPath=src/coverage.xml \\
                           -Dsonar.scm.disabled=true
                         """
