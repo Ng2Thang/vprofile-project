@@ -101,7 +101,7 @@ pipeline {
                     // The name must match the name of the server configuration.
                     withSonarQubeEnv('sonar-server') {
                         sh """
-                        ${scannerHome}/sonar-scanner \\
+                        ${scannerHome}/bin/sonar-scanner \\
                           -Dsonar.projectKey=python-project \\
                           -Dsonar.projectName=python-project \\
                           -Dsonar.projectVersion=${currentBuild.number} \\
