@@ -75,8 +75,9 @@ pipeline {
                 // Run tests from the workspace root to simplify path management.
                 // --cov=src: Measure coverage for the 'src' directory.
                 // --cov-report=xml:coverage.xml: Generate the report at the workspace root.
-                // src/: Tell pytest to discover tests in the 'src' directory.
-                sh ". ${VENV_DIR}/bin/activate && coverage run -m pytest src/ && coverage xml -o coverage.xml"
+                // --source=src: Explicitly tells coverage to measure the 'src' directory, ensuring correct paths in the report.
+                // tests/: Tell pytest to discover tests in the 'tests' directory.
+                sh ". ${VENV_DIR}/bin/activate && coverage run --source=src -m pytest tests/ && coverage xml -o coverage.xml"
             }
             post {
                 success {
@@ -106,7 +107,8 @@ pipeline {
                             -Dsonar.projectKey=python-project \\
                             -Dsonar.projectName=python-project \\
                             -Dsonar.projectVersion=${currentBuild.number} \\
-                            -Dsonar.sources=. \\
+                            -Dsonar.sources=src \\
+                            -Dsonar.tests=tests \\
                             -Dsonar.python.coverage.reportPath=coverage.xml \\
                             -Dsonar.scm.disabled=true
                         """
@@ -144,7 +146,7 @@ pipeline {
         //         withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIAL_ID, usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
         //             sh """
         //             . ${VENV_DIR}/bin/activate
-        //             twine upload --repository-url ${NEXUS_PYPI_REPO_URL} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD} dist/*
+        //             twine upload --repository-url ${NEXUS_PYPI_REPO_URL} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD} src/dist/*
         //             """
         //         }
         //     }
