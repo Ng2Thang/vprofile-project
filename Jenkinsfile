@@ -107,11 +107,7 @@ pipeline {
                         sh """
                         ${scannerHome}/bin/sonar-scanner \\
                           -Dsonar.projectKey=python-project \\
-                          -Dsonar.projectName=python-project \\
-                          -Dsonar.projectVersion=${currentBuild.number} \\
                           -Dsonar.sources=. \\
-                          -Dsonar.python.coverage.reportPath=src/coverage.xml \\
-                          -Dsonar.scm.disabled=true \\
                           -Dsonar.host.url=http://localhost:9000 \\
                           -Dsonar.login=sqp_b125a16574841c684f33a0c803cc59ab1d66be1a
                         """
