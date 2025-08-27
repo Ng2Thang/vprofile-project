@@ -90,6 +90,34 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            environment {
+                // ID of the 'Secret text' credential in Jenkins for your SonarQube token
+                SONAR_TOKEN_CRED_ID = 'sqp_b125a16574841c684f33a0c803cc59ab1d66be1a' 
+                // URL of your SonarQube server
+                SONAR_HOST_URL = 'http://localhost:9000' // Example, change to your SonarQube URL
+            }
+            steps {
+                script {
+                    // Ensure SonarQube scanner is available in the agent's PATH
+                    // or configured as a tool in Jenkins Global Tool Configuration.
+                    withCredentials([string(credentialsId: SONAR_TOKEN_CRED_ID, variable: 'SONAR_TOKEN')]) {
+                        sh """
+                        sonar-scanner \\
+                          -Dsonar.projectKey=vprofile-project \\
+                          -Dsonar.projectName=vprofile-project \\
+                          -Dsonar.projectVersion=${currentBuild.number} \\
+                          -Dsonar.sources=src \\
+                          -Dsonar.host.url=${SONAR_HOST_URL} \\
+                          -Dsonar.login=\${SONAR_TOKEN} \\
+                          -Dsonar.python.coverage.reportPath=src/coverage.xml \\
+                          -Dsonar.scm.disabled=true
+                        """
+                    }
+                }
+            }
+        }
+
         // stage('Build') {
         //     steps {
         //         echo "--- Building the project ---"
@@ -110,6 +138,7 @@ pipeline {
         //         }
         //     }
         // }
+        
 
         // stage('Publish to Nexus') {
         //     steps {
