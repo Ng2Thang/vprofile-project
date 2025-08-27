@@ -107,7 +107,6 @@ pipeline {
                             -Dsonar.projectName=python-project \\
                             -Dsonar.projectVersion=${currentBuild.number} \\
                             -Dsonar.sources=. \\
-                            -Dsonar.tests=src/tests \\
                             -Dsonar.python.coverage.reportPath=coverage.xml \\
                             -Dsonar.scm.disabled=true
                         """
