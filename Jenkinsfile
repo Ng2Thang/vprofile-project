@@ -92,8 +92,10 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            environment {
-                scannerHome = tool 'sonar-scanner'
+            tools {
+                // This name must match the name of the SonarQube Scanner installation
+                // configured in Jenkins -> Global Tool Configuration.
+                tool 'sonar-scanner'
             }
             steps {
                 script {
@@ -101,15 +103,13 @@ pipeline {
                     unstash 'coverage-report'
                     // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
                     // configured in Jenkins -> Configure System -> SonarQube servers.
-                    // The name must match the name of the server configuration.
                     withSonarQubeEnv('sonar-server') {
+                        // The 'tools' directive adds the scanner to the PATH, so we can call it directly.
                         sh """
-                        ${scannerHome}/bin/sonar-scanner \\
+                        sonar-scanner \\
                             -Dsonar.projectKey=python-project \\
                             -Dsonar.projectName=python-project \\
                             -Dsonar.projectVersion=${currentBuild.number} \\
-                            # Since the coverage report now contains full paths (e.g., 'src/app.py'),
-                            # we tell SonarQube to look for sources from the project root.
                             -Dsonar.sources=src \\
                             -Dsonar.tests=tests \\
                             -Dsonar.python.coverage.reportPath=coverage.xml \\
