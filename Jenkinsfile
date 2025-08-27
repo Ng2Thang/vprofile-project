@@ -68,26 +68,20 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                dir('src') {
-                    echo "--- Running unit tests ---"
-                    // Run tests with pytest, targeting the current directory for coverage,
-                    // and generate a coverage report in XML format.
-                    // Note the path to the activate script is relative to the 'src' directory.
-                    sh ". ../${VENV_DIR}/bin/activate && pytest --cov=. --cov-report=xml"
-                }
+                echo "--- Running unit tests ---"
+                // Run tests from the workspace root to simplify path management.
+                // --cov=src: Measure coverage for the 'src' directory.
+                // --cov-report=xml:coverage.xml: Generate the report at the workspace root.
+                // src/: Tell pytest to discover tests in the 'src' directory.
+                sh ". ${VENV_DIR}/bin/activate && pytest --cov=src --cov-report=xml:coverage.xml src/"
             }
             post {
                 success {
                     echo 'Unit tests passed.'
-                    // You can archive coverage reports here if needed.
-                    // For example, if you have the Cobertura plugin installed:
-                    // The coverage report is now generated inside the 'src' directory.
-                    // cobertura coberturaReportFile: 'src/coverage.xml'
-                    // Archive the coverage report so it can be downloaded from the Jenkins UI.
                     echo 'Stashing coverage report for SonarQube stage...'
-                    stash name: 'coverage-report', includes: 'src/coverage.xml'
+                    stash name: 'coverage-report', includes: 'coverage.xml'
                     echo 'Archiving test reports...'
-                    archiveArtifacts artifacts: 'src/coverage.xml'
+                    archiveArtifacts artifacts: 'coverage.xml'
                 }
             }
         }
@@ -110,7 +104,7 @@ pipeline {
                             -Dsonar.projectName=python-project \\
                             -Dsonar.projectVersion=${currentBuild.number} \\
                             -Dsonar.sources=src \\
-                            -Dsonar.python.coverage.reportPath=src/coverage.xml \\
+                            -Dsonar.python.coverage.reportPath=coverage.xml \\
                             -Dsonar.scm.disabled=true
                         """
                     }
