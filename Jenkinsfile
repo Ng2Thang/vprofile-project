@@ -76,10 +76,7 @@ pipeline {
                 // --cov=src: Measure coverage for the 'src' directory.
                 // --cov-report=xml:coverage.xml: Generate the report at the workspace root.
                 // src/: Tell pytest to discover tests in the 'src' directory.
-                // We use 'coverage run' to ensure paths in the report are relative to the project root (e.g., 'src/app.py'),
-                // which is essential for SonarQube integration.
-                // --source=src: Explicitly tells coverage to measure the 'src' directory, ensuring full paths in the report.
-                sh ". ${VENV_DIR}/bin/activate && coverage run --source=src -m pytest src/ && coverage xml -o coverage.xml"
+                sh ". ${VENV_DIR}/bin/activate && coverage run -m pytest src/ && coverage xml -o coverage.xml"
             }
             post {
                 success {
@@ -110,6 +107,7 @@ pipeline {
                             -Dsonar.projectName=python-project \\
                             -Dsonar.projectVersion=${currentBuild.number} \\
                             -Dsonar.sources=. \\
+                            -Dsonar.tests=src/tests \\
                             -Dsonar.python.coverage.reportPath=coverage.xml \\
                             -Dsonar.scm.disabled=true
                         """
