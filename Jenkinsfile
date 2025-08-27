@@ -91,11 +91,6 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            tools {
-                // This name must match the name of the SonarQube Scanner installation
-                // configured in Jenkins -> Global Tool Configuration.
-                tool 'sonar-scanner'
-            }
             steps {
                 script {
                     // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
