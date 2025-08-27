@@ -106,10 +106,12 @@ pipeline {
                     withSonarQubeEnv('sonar-server') {
                         sh """
                         ${scannerHome}/bin/sonar-scanner \\
-                          -Dsonar.projectKey=python-project \\
-                          -Dsonar.sources=. \\
-                          -Dsonar.host.url=https://7cff75154d12.ngrok-free.app \\
-                          -Dsonar.login=sqp_b125a16574841c684f33a0c803cc59ab1d66be1a
+                            -Dsonar.projectKey=python-project \\
+                            -Dsonar.projectName=python-project \\
+                            -Dsonar.projectVersion=${currentBuild.number} \\
+                            -Dsonar.sources=src \\
+                            -Dsonar.python.coverage.reportPath=src/coverage.xml \\
+                            -Dsonar.scm.disabled=true
                         """
                     }
                 }
