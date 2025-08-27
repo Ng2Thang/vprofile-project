@@ -104,8 +104,8 @@ pipeline {
                     withCredentials([string(credentialsId: SONAR_TOKEN_CRED_ID, variable: 'SONAR_TOKEN')]) {
                         sh """
                         sonar-scanner \\
-                          -Dsonar.projectKey=vprofile-project \\
-                          -Dsonar.projectName=vprofile-project \\
+                          -Dsonar.projectKey=python-project \\
+                          -Dsonar.projectName=python-project \\
                           -Dsonar.projectVersion=${currentBuild.number} \\
                           -Dsonar.sources=src \\
                           -Dsonar.host.url=${SONAR_HOST_URL} \\
