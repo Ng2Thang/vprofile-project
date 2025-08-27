@@ -18,9 +18,12 @@ pipeline {
         stage('Setup and Install Dependencies') {
             steps {
                 echo "--- Cloning source and installing dependencies ---"
+                // Clean the workspace to ensure no artifacts from previous builds interfere.
+                cleanWs()
                 // This step checks out the repository configured for this Jenkins job.
                 // The 'src' directory should be at the root of your repository.
                 checkout scm
+                echo "Source code checked out successfully."
 
                 script {
                     // Use python3, assuming it's available on the agent.
@@ -153,6 +156,7 @@ pipeline {
             echo 'Pipeline finished. Cleaning up workspace.'
             // Clean up the virtual environment
             sh "rm -rf ${VENV_DIR}"
+
         }
     }
 }
