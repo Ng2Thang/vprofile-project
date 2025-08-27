@@ -76,7 +76,7 @@ pipeline {
                 // 'coverage run --source=src': Runs tests and collects coverage data for the 'src' directory.
                 // '-m pytest tests/': Tells coverage to run pytest on the 'tests' directory.
                 // 'coverage xml -o coverage.xml': Generates the coverage report in Cobertura XML format.
-                sh ". ${VENV_DIR}/bin/activate && coverage run --source=src -m pytest tests/ && coverage xml -o coverage.xml"
+                sh ". ${VENV_DIR}/bin/activate && pytest --cov --cov-report xml tests/"
             }
             post {
                 success {

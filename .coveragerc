@@ -1,0 +1,11 @@
+[run]
+# Measure coverage for the 'src' directory.
+# This ensures that file paths in the report are relative to the project root
+# (e.g., 'src/app.py'), which is what tools like SonarQube expect.
+source = src
+
+[xml]
+# Define the output file for the XML report.
+# This allows you to run 'pytest --cov --cov-report=xml' without
+# specifying the output file name on the command line.
+output = coverage.xml
