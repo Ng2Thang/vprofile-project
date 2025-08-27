@@ -91,9 +91,9 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            environment {
-                scannerHome = tool 'sonar-scanner'
-            }
+            // environment {
+            //     scannerHome = tool 'sonar-scanner'
+            // }
             steps {
                 script {
                     // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
