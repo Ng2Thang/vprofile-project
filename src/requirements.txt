@@ -1,8 +1,0 @@
-# Application dependencies
-Flask
-
-# Build, Test & Lint dependencies
-build
-flake8
-pytest
-pytest-cov
