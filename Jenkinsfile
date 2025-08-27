@@ -78,7 +78,7 @@ pipeline {
                 // By not using --source, coverage paths are generated relative to the project root (e.g., 'src/app.py'),
                 // which is often more compatible with external tools like SonarQube.
                 // tests/: Tell pytest to discover tests in the 'tests' directory.
-                sh ". ${VENV_DIR}/bin/activate && coverage run -m pytest tests/ && coverage xml -o coverage.xml"
+                sh ". ${VENV_DIR}/bin/activate && coverage run --source=src -m pytest tests/ && coverage xml -o coverage.xml"
             }
             post {
                 success {
@@ -110,7 +110,7 @@ pipeline {
                             -Dsonar.projectVersion=${currentBuild.number} \\
                             # Since the coverage report now contains full paths (e.g., 'src/app.py'),
                             # we tell SonarQube to look for sources from the project root.
-                            -Dsonar.sources=. \\
+                            -Dsonar.sources=src \\
                             -Dsonar.tests=tests \\
                             -Dsonar.python.coverage.reportPath=coverage.xml \\
                             -Dsonar.scm.disabled=true
