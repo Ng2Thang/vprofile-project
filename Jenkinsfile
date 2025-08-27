@@ -91,16 +91,20 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            tools {
+                // This name must match the name of the SonarQube Scanner installation
+                // configured in Jenkins -> Global Tool Configuration.
+                tool 'sonar-scanner'
+            }
             environment {
                 // ID of the 'Secret text' credential in Jenkins for your SonarQube token
-                SONAR_TOKEN_CRED_ID = 'SONAR_TOKEN_CRED_ID' 
+                SONAR_TOKEN_CRED_ID = 'SONAR_TOKEN_CRED_ID'
                 // URL of your SonarQube server
-                SONAR_HOST_URL = 'http://localhost:9000' // Example, change to your SonarQube URL
+                SONAR_HOST_URL = 'http://localhost:9000' // Change to your SonarQube URL
             }
             steps {
                 script {
-                    // Ensure SonarQube scanner is available in the agent's PATH
-                    // or configured as a tool in Jenkins Global Tool Configuration.
+                    // The 'tool' directive above adds the SonarQube Scanner's bin directory to the PATH
                     withCredentials([string(credentialsId: SONAR_TOKEN_CRED_ID, variable: 'SONAR_TOKEN')]) {
                         sh """
                         sonar-scanner \\
