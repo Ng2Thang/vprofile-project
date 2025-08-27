@@ -84,6 +84,8 @@ pipeline {
                     // The coverage report is now generated inside the 'src' directory.
                     // cobertura coberturaReportFile: 'src/coverage.xml'
                     // Archive the coverage report so it can be downloaded from the Jenkins UI.
+                    echo 'Stashing coverage report for SonarQube stage...'
+                    stash name: 'coverage-report', includes: 'src/coverage.xml'
                     echo 'Archiving test reports...'
                     archiveArtifacts artifacts: 'src/coverage.xml'
                 }
@@ -96,6 +98,8 @@ pipeline {
             }
             steps {
                 script {
+                    // Retrieve the coverage file stashed from the Unit Test stage
+                    unstash 'coverage-report'
                     // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
                     // configured in Jenkins -> Configure System -> SonarQube servers.
                     // The name must match the name of the server configuration.
@@ -105,7 +109,7 @@ pipeline {
                           -Dsonar.projectKey=python-project \\
                           -Dsonar.projectName=python-project \\
                           -Dsonar.projectVersion=${currentBuild.number} \\
-                          -Dsonar.sources=src \\
+                          -Dsonar.sources=. \\
                           -Dsonar.python.coverage.reportPath=src/coverage.xml \\
                           -Dsonar.scm.disabled=true
                         """
