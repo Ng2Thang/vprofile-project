@@ -91,26 +91,23 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            // environment {
-            //     scannerHome = tool 'sonar-scanner'
-            // }
+            environment {
+                scannerHome = tool 'SonarScanner 4.0'
+            }
             steps {
                 script {
                     // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
                     // configured in Jenkins -> Configure System -> SonarQube servers.
                     // The name must match the name of the server configuration.
                     withSonarQubeEnv('sonar-server') {
-                        // sh """
-                        // ${scannerHome}/sonar-scanner \\
-                        //   -Dsonar.projectKey=python-project \\
-                        //   -Dsonar.projectName=python-project \\
-                        //   -Dsonar.projectVersion=${currentBuild.number} \\
-                        //   -Dsonar.sources=src \\
-                        //   -Dsonar.python.coverage.reportPath=src/coverage.xml \\
-                        //   -Dsonar.scm.disabled=true
-                        // """
                         sh """
-                            ls -la
+                        ${scannerHome}/sonar-scanner \\
+                          -Dsonar.projectKey=python-project \\
+                          -Dsonar.projectName=python-project \\
+                          -Dsonar.projectVersion=${currentBuild.number} \\
+                          -Dsonar.sources=src \\
+                          -Dsonar.python.coverage.reportPath=src/coverage.xml \\
+                          -Dsonar.scm.disabled=true
                         """
                     }
                 }
