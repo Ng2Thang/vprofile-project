@@ -76,7 +76,9 @@ pipeline {
                 // --cov=src: Measure coverage for the 'src' directory.
                 // --cov-report=xml:coverage.xml: Generate the report at the workspace root.
                 // src/: Tell pytest to discover tests in the 'src' directory.
-                sh ". ${VENV_DIR}/bin/activate && pytest --cov=src --cov-report=xml:coverage.xml src/"
+                // We use 'coverage run' to ensure paths in the report are relative to the project root (e.g., 'src/app.py'),
+                // which is better for tool integration.
+                sh ". ${VENV_DIR}/bin/activate && coverage run -m pytest src/ && coverage xml -o coverage.xml"
             }
             post {
                 success {
@@ -106,7 +108,7 @@ pipeline {
                             -Dsonar.projectKey=python-project \\
                             -Dsonar.projectName=python-project \\
                             -Dsonar.projectVersion=${currentBuild.number} \\
-                            -Dsonar.sources=src \\
+                            -Dsonar.sources=. \\
                             -Dsonar.python.coverage.reportPath=coverage.xml \\
                             -Dsonar.scm.disabled=true
                         """
