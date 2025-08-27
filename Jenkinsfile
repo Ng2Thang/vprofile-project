@@ -72,11 +72,11 @@ pipeline {
         stage('Unit Test') {
             steps {
                 echo "--- Running unit tests ---"
-                // Run tests from the workspace root to simplify path management.
-                // --cov=src: Tells pytest-cov to measure coverage for the 'src' directory.
-                // --cov-report=xml:coverage.xml: Generates the coverage report in XML format.
-                // tests/: Tell pytest to discover tests in the 'tests' directory.
-                sh ". ${VENV_DIR}/bin/activate && pytest --cov=src --cov-report=xml:coverage.xml tests/"
+                // Run unit tests using 'coverage' to ensure correct path mapping in the report for SonarQube.
+                // 'coverage run --source=src': Runs tests and collects coverage data for the 'src' directory.
+                // '-m pytest tests/': Tells coverage to run pytest on the 'tests' directory.
+                // 'coverage xml -o coverage.xml': Generates the coverage report in Cobertura XML format.
+                sh ". ${VENV_DIR}/bin/activate && coverage run --source=src -m pytest tests/ && coverage xml -o coverage.xml"
             }
             post {
                 success {
