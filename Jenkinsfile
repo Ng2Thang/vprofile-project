@@ -7,7 +7,7 @@ pipeline {
 
         // Nexus Configuration for a PyPI repository
         // NOTE: You might need to adjust NEXUS_REPOSITORY_NAME if your PyPI repository in Nexus has a different name.
-        NEXUS_REPOSITORY_NAME = "vprofile-pypi-release"
+        NEXUS_REPOSITORY_NAME = "python-project"
         NEXUS_URL             = "localhost:8081"
         NEXUS_PYPI_REPO_URL   = "http://${NEXUS_URL}/repository/${NEXUS_REPOSITORY_NAME}/"
         NEXUS_CREDENTIAL_ID   = "NEXUS_CREDENTIAL_ID"
