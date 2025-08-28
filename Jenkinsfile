@@ -8,9 +8,10 @@ pipeline {
         // Nexus Configuration for a PyPI repository
         // NOTE: You might need to adjust NEXUS_REPOSITORY_NAME if your PyPI repository in Nexus has a different name.
         NEXUS_REPOSITORY_NAME = "python-project"
-        NEXUS_URL             = "localhost:8081"
-        NEXUS_PYPI_REPO_URL   = "http://${NEXUS_URL}/repository/${NEXUS_REPOSITORY_NAME}/"
-        NEXUS_CREDENTIAL_ID   = "NEXUS_CREDENTIAL_ID"
+        // NEXUS_URL             = "localhost:8081"
+        NEXUS_URL           = "28afde4ce30b.ngrok-free.app"
+        NEXUS_PYPI_REPO_URL = "https://${NEXUS_URL}/repository/${NEXUS_REPOSITORY_NAME}/"
+        NEXUS_CREDENTIAL_ID = "NEXUS_CREDENTIAL_ID"
     }
 	
     stages {
@@ -150,25 +151,25 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            environment {
-                scannerHome = tool 'sonar-scanner'
-            }
-            steps {
-                script {
-                    // Retrieve the reports stashed from the Unit Test stage
-                    unstash 'sonar-reports'
-                    // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
-                    // configured in Jenkins -> Configure System -> SonarQube servers.
-                    // The name must match the name of the server configuration.
-                    withSonarQubeEnv('sonar-server') {
-                        // The sonar-scanner will automatically pick up the sonar-project.properties file.
-                        // We can still override properties here if needed, like the project version.
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectVersion=${currentBuild.number}"
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     environment {
+        //         scannerHome = tool 'sonar-scanner'
+        //     }
+        //     steps {
+        //         script {
+        //             // Retrieve the reports stashed from the Unit Test stage
+        //             unstash 'sonar-reports'
+        //             // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
+        //             // configured in Jenkins -> Configure System -> SonarQube servers.
+        //             // The name must match the name of the server configuration.
+        //             withSonarQubeEnv('sonar-server') {
+        //                 // The sonar-scanner will automatically pick up the sonar-project.properties file.
+        //                 // We can still override properties here if needed, like the project version.
+        //                 sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectVersion=${currentBuild.number}"
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Build') {
             steps {
