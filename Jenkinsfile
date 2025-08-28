@@ -8,7 +8,7 @@ pipeline {
         // Nexus Configuration for a PyPI repository
         // NOTE: You might need to adjust NEXUS_REPOSITORY_NAME if your PyPI repository in Nexus has a different name.
         NEXUS_REPOSITORY_NAME = "vprofile-pypi-release"
-        NEXUS_URL             = "172.31.40.209:8081"
+        NEXUS_URL             = "localhost:8081"
         NEXUS_PYPI_REPO_URL   = "http://${NEXUS_URL}/repository/${NEXUS_REPOSITORY_NAME}/"
         NEXUS_CREDENTIAL_ID   = "nexuslogin"
     }
@@ -190,18 +190,23 @@ pipeline {
         }
         
 
-        // stage('Publish to Nexus') {
-        //     steps {
-        //         echo "--- Publishing to Nexus ---"
-        //         // Use Jenkins credentials for Nexus username and password
-        //         withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIAL_ID, usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-        //             sh """
-        //             . ${VENV_DIR}/bin/activate
-        //             twine upload --repository-url ${NEXUS_PYPI_REPO_URL} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD} src/dist/*
-        //             """
-        //         }
-        //     }
-        // }
+        stage('Publish to Nexus') {
+            steps {
+                echo "--- Publishing to Nexus ---"
+                // Use Jenkins credentials for Nexus username and password
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: NEXUS_CREDENTIAL_ID,
+                        usernameVariable: 'NEXUS_USERNAME',
+                        passwordVariable: 'NEXUS_PASSWORD'
+                    )]) {
+                    sh """
+                    . ${VENV_DIR}/bin/activate
+                    twine upload --repository-url ${NEXUS_PYPI_REPO_URL} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD} dist/*
+                    """
+                }
+            }
+        }
     }
 
     post {
