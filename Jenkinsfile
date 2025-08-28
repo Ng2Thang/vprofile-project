@@ -173,11 +173,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo "--- Building the project ---"
-                // Clean previous build artifacts
-                sh "rm -rf dist/ build/ *.egg-info"
-                // Build the wheel and source distribution using the 'build' package
-                // Note the path to the activate script is relative to the 'src' directory.
-                sh ". ../${VENV_DIR}/bin/activate && python -m build"
+                // Clean previous build artifacts from the 'src' directory
+                sh "rm -rf src/dist/ src/build/ src/*.egg-info"
+                // Build the project located in the 'src' directory from the workspace root.
+                // The 'build' package will create 'dist' and 'build' inside 'src'.
+                sh ". ${VENV_DIR}/bin/activate && python -m build src"
             }
             post {
                 success {
