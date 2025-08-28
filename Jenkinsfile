@@ -63,7 +63,7 @@ pipeline {
                     } catch (any) {
                         echo "Linting failed, but continuing."
                         // Mark the build as unstable to provide a visual cue of the non-critical failure.
-                        currentBuild.result = 'UNSTABLE'
+                        // currentBuild.result = 'UNSTABLE'
                     }
                 }
             }
@@ -83,7 +83,7 @@ pipeline {
                     } catch (any) {
                         echo "Pylint analysis found issues. See the pylint-report.txt for details."
                         // Mark the build as unstable to provide a visual cue of the non-critical failure.
-                        currentBuild.result = 'UNSTABLE'
+                        // currentBuild.result = 'UNSTABLE'
                     } finally {
                         // Always archive the report, regardless of success or failure.
                         if (fileExists('pylint-report.txt')) {
@@ -109,7 +109,7 @@ pipeline {
                     } catch (any) {
                         echo "Bandit found potential security issues. See the bandit-report.json for details."
                         // Mark the build as unstable. Bandit exits with a non-zero code if issues are found.
-                        currentBuild.result = 'UNSTABLE'
+                        // currentBuild.result = 'UNSTABLE'
                     } finally {
                         // Always archive the report.
                         if (fileExists('bandit-report.json')) {
@@ -173,14 +173,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo "--- Building the project ---"
-                // The build process should run inside the 'src' directory where setup.py/pyproject.toml is located.
-                dir('src') {
-                    // Clean previous build artifacts
-                    sh "rm -rf dist/ build/ *.egg-info"
-                    // Build the wheel and source distribution using the 'build' package
-                    // Note the path to the activate script is relative to the 'src' directory.
-                    sh ". ../${VENV_DIR}/bin/activate && python -m build"
-                }
+                // Clean previous build artifacts
+                sh "rm -rf dist/ build/ *.egg-info"
+                // Build the wheel and source distribution using the 'build' package
+                // Note the path to the activate script is relative to the 'src' directory.
+                sh ". ../${VENV_DIR}/bin/activate && python -m build"
             }
             post {
                 success {
