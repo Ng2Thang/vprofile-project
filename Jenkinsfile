@@ -170,26 +170,26 @@ pipeline {
             }
         }
 
-        // stage('Build') {
-        //     steps {
-        //         echo "--- Building the project ---"
-        //         // The build process should run inside the 'src' directory where setup.py/pyproject.toml is located.
-        //         dir('src') {
-        //             // Clean previous build artifacts
-        //             sh "rm -rf dist/ build/ *.egg-info"
-        //             // Build the wheel and source distribution using the 'build' package
-        //             // Note the path to the activate script is relative to the 'src' directory.
-        //             sh ". ../${VENV_DIR}/bin/activate && python -m build"
-        //         }
-        //     }
-        //     post {
-        //         success {
-        //             echo 'Archiving build artifacts...'
-        //             // Artifacts are in the 'src/dist' directory after the build.
-        //             archiveArtifacts artifacts: 'src/dist/*'
-        //         }
-        //     }
-        // }
+        stage('Build') {
+            steps {
+                echo "--- Building the project ---"
+                // The build process should run inside the 'src' directory where setup.py/pyproject.toml is located.
+                dir('src') {
+                    // Clean previous build artifacts
+                    sh "rm -rf dist/ build/ *.egg-info"
+                    // Build the wheel and source distribution using the 'build' package
+                    // Note the path to the activate script is relative to the 'src' directory.
+                    sh ". ../${VENV_DIR}/bin/activate && python -m build"
+                }
+            }
+            post {
+                success {
+                    echo 'Archiving build artifacts...'
+                    // Artifacts are in the 'src/dist' directory after the build.
+                    archiveArtifacts artifacts: 'src/dist/*'
+                }
+            }
+        }
         
 
         // stage('Publish to Nexus') {
