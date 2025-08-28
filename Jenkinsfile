@@ -43,7 +43,7 @@ pipeline {
                     . ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
-                    pip install pytest pytest-cov flake8 build twine
+                    pip install pytest pytest-cov flake8 pylint bandit build twine
                     """
                 }
             }
@@ -69,22 +69,80 @@ pipeline {
             }
         }
 
+        stage('Pylint Analysis') {
+            steps {
+                script {
+                    try {
+                        echo "--- Running Pylint analysis ---"
+                        sh """
+                        set -e
+                        . ${VENV_DIR}/bin/activate
+                        pylint src -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --output=pylint-report.txt
+                        """
+                        echo "Pylint analysis passed."
+                    } catch (any) {
+                        echo "Pylint analysis found issues. See the pylint-report.txt for details."
+                        // Mark the build as unstable to provide a visual cue of the non-critical failure.
+                        currentBuild.result = 'UNSTABLE'
+                    } finally {
+                        // Always archive the report, regardless of success or failure.
+                        if (fileExists('pylint-report.txt')) {
+                            echo "Archiving Pylint report..."
+                            archiveArtifacts artifacts: 'pylint-report.txt'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Security Analysis (Bandit)') {
+            steps {
+                script {
+                    try {
+                        echo "--- Running security analysis with Bandit ---"
+                        sh """
+                        set -e
+                        . ${VENV_DIR}/bin/activate
+                        bandit -r ./src --format json --output bandit-report.json
+                        """
+                        echo "Bandit analysis passed with no high-severity issues."
+                    } catch (any) {
+                        echo "Bandit found potential security issues. See the bandit-report.json for details."
+                        // Mark the build as unstable. Bandit exits with a non-zero code if issues are found.
+                        currentBuild.result = 'UNSTABLE'
+                    } finally {
+                        // Always archive the report.
+                        if (fileExists('bandit-report.json')) {
+                            echo "Archiving Bandit report..."
+                            archiveArtifacts artifacts: 'bandit-report.json'
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Unit Test') {
             steps {
                 echo "--- Running unit tests ---"
-                // Run unit tests using 'coverage' to ensure correct path mapping in the report for SonarQube.
-                // 'coverage run --source=src': Runs tests and collects coverage data for the 'src' directory.
-                // '-m pytest tests/': Tells coverage to run pytest on the 'tests' directory.
-                // 'coverage xml -o coverage.xml': Generates the coverage report in Cobertura XML format.
-                sh ". ${VENV_DIR}/bin/activate && pytest --cov --cov-report xml tests/"
+                // Run unit tests with coverage.
+                // 'coverage run --source=src ...': Runs pytest under coverage's control, collecting data only for the 'src' directory.
+                // '--junitxml=xunit-reports.xml': Generates a test execution report that SonarQube can analyze.
+                // 'coverage xml --omit="tests/*"': Generates the coverage.xml report from the collected data, excluding test files.
+                sh """
+                . ${VENV_DIR}/bin/activate
+                coverage run --source=src -m pytest --junitxml=xunit-reports.xml tests/
+                coverage xml --omit="tests/*"
+                """
             }
             post {
                 success {
                     echo 'Unit tests passed.'
-                    echo 'Stashing coverage report for SonarQube stage...'
-                    stash name: 'coverage-report', includes: 'coverage.xml'
+                    echo 'Stashing reports for SonarQube stage...'
+                    // Stash both coverage and test reports for the SonarQube stage.
+                    stash name: 'sonar-reports', includes: 'coverage.xml, xunit-reports.xml'
                     echo 'Archiving test reports...'
-                    archiveArtifacts artifacts: 'coverage.xml'
+                    // Archive both reports as build artifacts.
+                    archiveArtifacts artifacts: 'coverage.xml, xunit-reports.xml'
                 }
             }
         }
@@ -95,23 +153,15 @@ pipeline {
             }
             steps {
                 script {
-                    // Retrieve the coverage file stashed from the Unit Test stage
-                    unstash 'coverage-report'
+                    // Retrieve the reports stashed from the Unit Test stage
+                    unstash 'sonar-reports'
                     // The 'withSonarQubeEnv' block will inject the SonarQube server URL and credentials
                     // configured in Jenkins -> Configure System -> SonarQube servers.
                     // The name must match the name of the server configuration.
                     withSonarQubeEnv('sonar-server') {
-                        // The 'tools' directive adds the scanner to the PATH, so we can call it directly.
-                        sh """
-                        ${scannerHome}/bin/sonar-scanner \\
-                            -Dsonar.projectKey=python-project \\
-                            -Dsonar.projectName=python-project \\
-                            -Dsonar.projectVersion=${currentBuild.number} \\
-                            -Dsonar.sources=src \\
-                            -Dsonar.tests=tests \\
-                            -Dsonar.python.coverage.reportPath=coverage.xml \\
-                            -Dsonar.scm.disabled=true
-                        """
+                        // The sonar-scanner will automatically pick up the sonar-project.properties file.
+                        // We can still override properties here if needed, like the project version.
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectVersion=${currentBuild.number}"
                     }
                 }
             }
