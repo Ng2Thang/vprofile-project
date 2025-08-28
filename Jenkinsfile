@@ -10,7 +10,7 @@ pipeline {
         NEXUS_REPOSITORY_NAME = "vprofile-pypi-release"
         NEXUS_URL             = "localhost:8081"
         NEXUS_PYPI_REPO_URL   = "http://${NEXUS_URL}/repository/${NEXUS_REPOSITORY_NAME}/"
-        NEXUS_CREDENTIAL_ID   = "nexuslogin"
+        NEXUS_CREDENTIAL_ID   = "NEXUS_CREDENTIAL_ID"
     }
 	
     stages {
