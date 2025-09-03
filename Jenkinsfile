@@ -212,6 +212,28 @@ pipeline {
 
     post {
         always {
+            script {
+                // Ensure the 'Google Chat Notification' plugin is installed in Jenkins.
+                // Also, configure a 'Secret text' credential with the ID 'google-chat-webhook'
+                // containing your Google Chat space's webhook URL.
+
+                def jobName = env.JOB_NAME
+                def buildNumber = env.BUILD_NUMBER
+                def buildStatus = currentBuild.currentResult
+                def buildUrl = env.BUILD_URL
+                def message
+
+                if (buildStatus == 'SUCCESS') {
+                    message = "✅ *${jobName}* #${buildNumber} - *SUCCESS* (<${buildUrl}|Open>)"
+                } else if (buildStatus == 'UNSTABLE') {
+                    message = "⚠️ *${jobName}* #${buildNumber} - *UNSTABLE* (<${buildUrl}|Open>)"
+                } else { // Handles FAILURE, ABORTED, etc.
+                    message = "❌ *${jobName}* #${buildNumber} - *${buildStatus}* (<${buildUrl}|Open>)"
+                }
+
+                googleChat(url: credentials('google-chat-webhook'), message: message)
+            }
+
             echo 'Pipeline finished. Cleaning up workspace.'
             // Clean up the virtual environment
             sh "rm -rf ${VENV_DIR}"
