@@ -1,6 +1,6 @@
 [project]
 name = "vprofile-python-app"
-version = "0.1.0"
+version = "0.1.1"
 description = "A sample Python web application for the vprofile project."
 readme = "README.md"
 requires-python = ">=3.7"
