@@ -231,7 +231,9 @@ pipeline {
                     message = "❌ *${jobName}* #${buildNumber} - *${buildStatus}* (<${buildUrl}|Open>)"
                 }
 
-                googlechatnotification(url: credentials('google-chat-webhook'), message: message)
+                 withCredentials([string(credentialsId: 'google-chat-webhook', variable: 'GOOGLE_CHAT_WEBHOOK_URL')]) {
+                    googlechatnotification(url: GOOGLE_CHAT_WEBHOOK_URL, message: message)
+                }
             }
 
             echo 'Pipeline finished. Cleaning up workspace.'
