@@ -231,7 +231,7 @@ pipeline {
                     message = "❌ *${jobName}* #${buildNumber} - *${buildStatus}* (<${buildUrl}|Open>)"
                 }
 
-                 withCredentials([string(credentialsId: 'google-chat-webhook', variable: 'GOOGLE_CHAT_WEBHOOK_URL')]) {
+                withCredentials([string(credentialsId: 'google-chat-webhook', variable: 'GOOGLE_CHAT_WEBHOOK_URL')]) {
                     googlechatnotification(url: GOOGLE_CHAT_WEBHOOK_URL, message: message)
                 }
             }
