@@ -174,12 +174,17 @@ pipeline {
         stage('Build') {
             steps {
                 echo "--- Building the project ---"
-                sh "rm -rf dist/ build/ src/*.egg-info"                
-                sh ". ${VENV_DIR}/bin/activate && python setup.py egg_info --tag-build=.${currentBuild.number} sdist bdist_wheel"
+                // Clean previous build artifacts. The build tool will create 'dist/' and 'build/' in the root.
+                sh "rm -rf dist/ build/ src/*.egg-info"
+                // Build the project from the workspace root. The build tool will find
+                // pyproject.toml or setup.py in the current directory and create the
+                // distributable packages in the 'dist' directory.
+                sh ". ${VENV_DIR}/bin/activate && python -m build"
             }
             post {
                 success {
                     echo 'Archiving build artifacts...'
+                    // Artifacts are in the root 'dist' directory after the build.
                     archiveArtifacts artifacts: 'dist/*'
                 }
             }
